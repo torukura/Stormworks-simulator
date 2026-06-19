@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stormworks Advanced Engine & Vehicle Propulsion Simulator</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #1a1a1f;
+            color: #e2e2e9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #24242d;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .lang-switch-box {
+            position: absolute;
+            top: 25px;
+            right: 30px;
+            display: flex;
+            gap: 5px;
+        }
+        .lang-btn {
+            background: #3a3a47;
+            color: #b2bec3;
+            border: 1px solid #525266;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        .lang-btn.active {
+            background: #ff9f43;
+            color: #1a1a1f;
+            border-color: #ff9f43;
+        }
+        .lang-btn:hover:not(.active) {
+            background: #4e4e5f;
+            color: #fff;
+        }
+        h1 {
+            text-align: center;
+            color: #ff9f43;
+            margin-top: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #3a3a47;
+            padding-bottom: 10px;
+            font-size: 1.6rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        @media (max-width: 950px) {
+            .grid { grid-template-columns: 1fr; }
+            .lang-switch-box { position: static; justify-content: center; margin-bottom: 15px; }
+        }
+        .panel {
+            background: #2d2d38;
+            padding: 22px;
+            border-radius: 8px;
+            border: 1px solid #414152;
+        }
+        h2 {
+            font-size: 1.1rem;
+            color: #00d2d3;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-left: 4px solid #00d2d3;
+            padding-left: 8px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: #b2bec3;
+        }
+        select, input[type="number"], input[type="range"] {
+            width: 100%;
+            padding: 9px;
+            background: #191921;
+            border: 1px solid #525266;
+            color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="range"] {
+            padding: 0;
+            margin-top: 5px;
+        }
+        .range-val {
+            float: right;
+            color: #ff9f43;
+            font-weight: bold;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #3a3a47;
+            font-size: 0.95rem;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-val {
+            font-weight: bold;
+            color: #1dd1a1;
+        }
+        .speed-box {
+            background: #191921;
+            border: 2px solid #00d2d3;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .speed-title {
+            color: #00d2d3;
+            font-weight: bold;
+            font-size: 1.0rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .speed-display {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 12px rgba(0,210,211,0.4);
+            margin: 3px 0;
+        }
+        .temp-box {
+            background: #191921;
+            border: 2px solid #ff4757;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .temp-title {
+            color: #ff4757;
+            font-weight: bold;
+            font-size: 1.0rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .temp-display {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 12px rgba(255,71,87,0.4);
+            margin: 3px 0;
+        }
+        .alert {
+            color: #ff6b6b;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            min-height: 24px;
+        }
+        .info-note {
+            font-size: 0.8rem;
+            color: #ff9f43;
+            margin-top: 4px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="lang-switch-box">
+        <button class="lang-btn active" onclick="changeLanguage('ja', event)">日本語</button>
+        <button class="lang-btn" onclick="changeLanguage('en', event)">English</button>
+        <button class="lang-btn" onclick="changeLanguage('ru', event)">Русский</button>
+        <button class="lang-btn" onclick="changeLanguage('zh', event)">简体中文</button>
+    </div>
+
+    <h1 id="mainTitle">Stormworks 統合パワー＆冷却・足回りコンプリートシミュレーター</h1>
+    
+    <div class="grid">
+        <div class="panel">
+            <h2 id="sec1Title">1. エンジン・パワートレイン設定</h2>
+            <div class="input-group">
+                <label id="lblEngineType" for="engineType">エンジンの種類</label>
+                <select id="engineType"></select>
+            </div>
+            
+            <div class="input-group">
+                <label id="lblEngineCount" for="engineCount">設置台数 / 気筒数（シリンダー数）</label>
+                <input type="number" id="engineCount" min="1" max="64" value="1">
+                <span class="info-note" id="cylinderNote">※既存は「台数」、モジュールは「気筒数」</span>
+            </div>
+
+            <div class="input-group">
+                <label id="lblGearRatio" for="gearRatio">ギヤボックス比率</label>
+                <select id="gearRatio"></select>
+            </div>
+
+            <h2 id="sec2Title">2. 冷却ライン＆流体設定 🛠️</h2>
+            <div class="input-group">
+                <label id="lblRadType" for="radType">使用するラジエーターの種類</label>
+                <select id="radType"></select>
+            </div>
+
+            <div class="input-group">
+                <label id="lblRadCount" for="radCount">ラジエーターの設置枚数</label>
+                <input type="number" id="radCount" min="1" max="32" value="1">
+            </div>
+
+            <div class="input-group">
+                <label id="lblPumpType" for="pumpType">冷却ラインの配管構成（ポンプ）</label>
+                <select id="pumpType"></select>
+            </div>
+
+            <h2 id="sec3Title">3. 推進・駆動パーツ ＆ 操作環境 ⚓</h2>
+            <div class="input-group">
+                <label id="lblPropType" for="propType">接続する足回り・推進器 (XML実測値)</label>
+                <select id="propType"></select>
+            </div>
+
+            <div class="input-group">
+                <label id="lblDragType" for="dragType">機体・車体の形状 (空気/水流抵抗ベース)</label>
+                <select id="dragType"></select>
+            </div>
+
+            <div class="input-group">
+                <label><span id="lblTargetRPS">ターゲット運転RPS</span>: <span class="range-val" id="rpsVal">20</span></label>
+                <input type="range" id="rps" min="2" max="100" step="0.5" value="20">
+            </div>
+
+            <div class="input-group">
+                <label><span id="lblThrottle">スロットル開度</span>: <span class="range-val" id="throttleVal">0.5</span></label>
+                <input type="range" id="throttle" min="0" max="1" step="0.05" value="0.5">
+            </div>
+        </div>
+
+        <div class="panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <h2 id="sec4Title">4. リアルタイム・シミュレーション結果</h2>
+                
+                <div class="result-item">
+                    <span id="resMass">システム合計質量 (冷却・推進器含む):</span>
+                    <span class="result-val" id="totalMass">0</span>
+                </div>
+                <div class="result-item">
+                    <span id="resTorque">総発生最大トルク:</span>
+                    <span class="result-val" id="totalPower">0</span>
+                </div>
+                <div class="result-item">
+                    <span id="resLoad">推進器からエンジンへの逆流負荷:</span>
+                    <span class="result-val" id="propLoad" style="color: #ff7675;">0</span>
+                </div>
+                <div class="result-item">
+                    <span id="resForce">発生推力 / 地面駆動力出力:</span>
+                    <span class="result-val" id="outForce" style="color: #ff9f43;">0 N</span>
+                </div>
+                <div class="result-item">
+                    <span id="resFlow">冷却ラインの循環流量:</span>
+                    <span class="result-val" id="flowRate" style="color: #00d2d3;">0.0 L/s</span>
+                </div>
+                <div class="result-item">
+                    <span id="resHeat">総発熱量 (負荷熱ペナルティ込):</span>
+                    <span class="result-val" id="heatGen" style="color: #ff4757;">0 units</span>
+                </div>
+                <div class="result-item">
+                    <span id="resFuel">推定燃料消費量:</span>
+                    <span class="result-val" id="fuelCons">0.00 L/s</span>
+                </div>
+                
+                <div class="speed-box">
+                    <div class="speed-title" id="boxSpeedTitle">🏁 計算上の推定最高速度</div>
+                    <div class="speed-display" id="speedDisplay">0.0 km/h</div>
+                    <div id="speedUnitKnot" style="font-size: 0.85rem; color: #a4b0be;">(0.0 knots)</div>
+                </div>
+
+                <div class="temp-box" id="tempBox">
+                    <div class="temp-title" id="boxTempTitle">🌡️ 連続運転時の推定飽和温度</div>
+                    <div class="temp-display" id="tempDisplay">15.0 ℃</div>
+                    <div id="tempStatus" style="font-size: 0.85rem; color: #a4b0be;">周囲温度と同じ</div>
+                </div>
+            </div>
+
+            <div class="alert" id="statusAlert"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'ja';
+
+    const uiTexts = {
+        ja: {
+            mainTitle: "Stormworks 統合パワー＆冷却・足回りコンプリートシミュレーター",
+            sec1Title: "1. エンジン・パワートレイン設定",
+            lblEngineType: "エンジンの種類",
+            lblEngineCount: "設置台数 / 気筒数（シリンダー数）",
+            lblGearRatio: "ギヤボックス比率",
+            sec2Title: "2. 冷却ライン＆流体設定 🛠️",
+            lblRadType: "使用するラジエーターの種類",
+            lblRadCount: "ラジエーターの設置枚数",
+            lblPumpType: "冷却ラインの配管構成（ポンプ）",
+            sec3Title: "3. 推進・駆動パーツ ＆ 操作環境 ⚓",
+            lblPropType: "接続する足回り・推進器 (XML実測値)",
+            lblDragType: "機体・車体の形状 (空気/水流抵抗ベース)",
+            lblTargetRPS: "ターゲット運転RPS",
+            lblThrottle: "スロットル開度",
+            sec4Title: "4. リアルタイム・シミュレーション結果",
+            resMass: "システム合計質量 (冷却・推進器含む):",
+            resTorque: "総発生最大トルク:",
+            resLoad: "推進器からエンジンへの逆流負荷:",
+            resForce: "発生推力 / 地面駆動力出力:",
+            resFlow: "冷却ラインの循環流量:",
+            resHeat: "総発熱量 (負荷熱ペナルティ込):",
+            resFuel: "推定燃料消費量:",
+            boxSpeedTitle: "🏁 計算上の推定最高速度",
+            boxTempTitle: "🌡️ 連続運転時の推定飽和温度",
+            noteStd: "※既存エンジン：同じエンジンを {count} 台並列で計算中",
+            noteMod: "※モジュラーエンジン：{count} 気筒として計算中",
+            unitMass: " (ブロック総質量)",
+            tempSafe: "🟢 安全圏（長時間の全開走行が可能です）",
+            tempWarn: "⚠️ 高温警告（オーバーヒート手前です。冷却増設を推奨）",
+            tempDanger: "🚨 爆発危険（確実に沸騰してエンジンが破損します！）",
+            alertStall: "🚨 トルク不足：負荷が重すぎてエンジンがストール（停止）します！",
+            alertOverheat: "⚠️ 冷却力・流量不足：ポンプを増設するかラジエーターを見直してください！",
+            alertStable: "🟢 パワートレイン・流体＆推進駆動システム 正常稼働中"
+        },
+        en: {
+            mainTitle: "Stormworks Advanced Engine, Fluid & Propulsion Simulator",
+            sec1Title: "1. Engine & Powertrain Settings",
+            lblEngineType: "Engine Type",
+            lblEngineCount: "Number of Engines / Cylinders",
+            lblGearRatio: "Gearbox Ratio",
+            sec2Title: "2. Cooling Line & Fluid Settings 🛠️",
+            lblRadType: "Radiator Type",
+            lblRadCount: "Number of Radiators",
+            lblPumpType: "Cooling Pipe Configuration (Pump)",
+            sec3Title: "3. Drive Components & Environment ⚓",
+            lblPropType: "Connected Propulsion / Drive Part (XML Specs)",
+            lblDragType: "Body Drag Shape Profile",
+            lblTargetRPS: "Target Operational RPS",
+            lblThrottle: "Throttle Input",
+            sec4Title: "4. Real-time Simulation Results",
+            resMass: "Total System Mass:",
+            resTorque: "Total Maximum Torque Output:",
+            resLoad: "Load Feedback Torque to Engine:",
+            resForce: "Generated Force / Drive Output:",
+            resFlow: "Coolant Flow Rate:",
+            resHeat: "Total Heat Generated:",
+            resFuel: "Estimated Fuel Consumption:",
+            boxSpeedTitle: "🏁 Estimated Top Speed",
+            boxTempTitle: "🌡️ Estimated Stabilized Temperature",
+            noteStd: "* Standard Engine: {count} engine(s) in parallel",
+            noteMod: "* Modular Engine: {count}-cylinder engine",
+            unitMass: " (Total Block Mass)",
+            tempSafe: "🟢 SAFE (Continuous operation allowed)",
+            tempWarn: "⚠️ WARNING (Near overheating)",
+            tempDanger: "🚨 DANGER (Engine will boil and explode!)",
+            alertStall: "🚨 TORQUE DEFICIT: Load too heavy, engine will stall!",
+            alertOverheat: "⚠️ INSUFFICIENT COOLING: Upgrade radiators or pumps!",
+            alertStable: "🟢 Powertrain, Fluid & Propulsion System Operating Safely"
+        },
+        ru: {
+            mainTitle: "Симулятор двигателей и ходовой части Stormworks",
+            sec1Title: "1. Настройки трансмиссии",
+            lblEngineType: "Тип двигателя",
+            lblEngineCount: "Количество двигателей / цилиндров",
+            lblGearRatio: "Передаточное число",
+            sec2Title: "2. Контур охлаждения 🛠️",
+            lblRadType: "Тип радиатора",
+            lblRadCount: "Количество радиаторов",
+            lblPumpType: "Конфигурация помпы",
+            sec3Title: "3. Компоненты движителя ⚓",
+            lblPropType: "Элемент ходовой части (XML данные)",
+            lblDragType: "Форма кузова (Сопротивление)",
+            lblTargetRPS: "Целевые обороты (RPS)",
+            lblThrottle: "Положение дросселя",
+            sec4Title: "4. Результаты симуляции",
+            resMass: "Общая масса системы:",
+            resTorque: "Общий крутящий момент:",
+            resLoad: "Момент обратной нагрузки:",
+            resForce: "Вырабатываемая тяга / Толкающая сила:",
+            resFlow: "Скорость потока хладагента:",
+            resHeat: "Общее тепловыделение:",
+            resFuel: "Расчетный расход топлива:",
+            boxSpeedTitle: "🏁 Расчетная максимальная скорость",
+            boxTempTitle: "🌡️ Расчетная стабильная температура",
+            noteStd: "* Стандартный: {count} двигателей",
+            noteMod: "* Модульный: {count}-цилиндров",
+            unitMass: " (Масса)",
+            tempSafe: "🟢 БЕЗОПАСНО",
+            tempWarn: "⚠️ ПРЕДУПРЕЖДЕНИЕ",
+            tempDanger: "🚨 ОПАСНОСТЬ",
+            alertStall: "🚨 НЕДОСТАТОЧНО МОМЕНТА!",
+            alertOverheat: "⚠️ НЕДОСТАТОЧНОЕ ОХЛАЖДЕНИЕ!",
+            alertStable: "🟢 Система спроектирована стабильно"
+        },
+        zh: {
+            mainTitle: "Stormworks 动力、冷却与全规格底盤驱动模拟器",
+            sec1Title: "1. 动力总成设置",
+            lblEngineType: "引擎类型",
+            lblEngineCount: "引擎数量 / 气缸数",
+            lblGearRatio: "变速箱齿轮比",
+            sec2Title: "2. 冷却管路与流体设置 🛠️",
+            lblRadType: "散热器类型",
+            lblRadCount: "散热器数量",
+            lblPumpType: "管路泵浦配置",
+            sec3Title: "3. 驱动部件与环境设置 ⚓",
+            lblPropType: "连接底盘/推进部件 (XML实测)",
+            lblDragType: "车体/船体外形阻力",
+            lblTargetRPS: "目标运行 RPS",
+            lblThrottle: "油门开度",
+            sec4Title: "4. 实时模拟结果",
+            resMass: "系统总质量:",
+            resTorque: "总输出最大扭矩:",
+            resLoad: "反馈至引擎的负载扭矩:",
+            resForce: "产生的推力 / 地面驱动力输出:",
+            resFlow: "冷却液循环流量:",
+            resHeat: "总发熱量:",
+            resFuel: "预计燃料消耗量:",
+            boxSpeedTitle: "🏁 计算预计最高速度",
+            boxTempTitle: "🌡️ 连续运行预计饱和温度",
+            noteStd: "※ 标准引擎：按 {count} 台引擎并联计算",
+            noteMod: "※ 模块化引擎：按 {count} 气缸计算",
+            unitMass: " (方块总质量)",
+            tempSafe: "🟢 安全（支持长时间全油门运行）",
+            tempWarn: "⚠️ 高温警告（接近过热）",
+            tempDanger: "🚨 爆炸危险（引擎将开锅开裂！）",
+            alertStall: "🚨 扭矩不足：负载过重，引擎将熄火！",
+            alertOverheat: "⚠️ 冷却力不足：请改善散热！",
+            alertStable: "🟢 动力系统与底盘传动 运行正常"
+        }
+    };
+
+    const selectOptions = {
+        engineType: {
+            ja: [
+                { type: 'group', label: '【既存の一体型エンジン】' },
+                { val: 'std_small', text: 'Small Engine (既存小型) [質量:30]' },
+                { val: 'std_medium', text: 'Medium Engine (既存中型) [質量:80]', selected: true },
+                { val: 'std_large', text: 'Large Engine (既存大型) [質量:400]' },
+                { type: 'groupEnd' },
+                { type: 'group', label: '【モジュラーエンジン】' },
+                { val: 'mod_1x1', text: '1x1 モジュラーシリンダー [単体質量:1]' },
+                { val: 'mod_3x3', text: '3x3 モジュラーシリンダー [単体質量:11]' },
+                { val: 'mod_5x5', text: '5x5 モジュラーシリンダー [単体質量:45]' },
+                { type: 'groupEnd' }
+            ],
+            en: [
+                { type: 'group', label: '[Prefabricated Engines]' },
+                { val: 'std_small', text: 'Small Engine [Mass:30]' },
+                { val: 'std_medium', text: 'Medium Engine [Mass:80]', selected: true },
+                { val: 'std_large', text: 'Large Engine [Mass:400]' },
+                { type: 'groupEnd' },
+                { type: 'group', label: '[Modular Engines]' },
+                { val: 'mod_1x1', text: '1x1 Modular Cylinder [Unit Mass:1]' },
+                { val: 'mod_3x3', text: '3x3 Modular Cylinder [Unit Mass:11]' },
+                { val: 'mod_5x5', text: '5x5 Modular Cylinder [Unit Mass:45]' },
+                { type: 'groupEnd' }
+            ]
+        },
+        gearRatio: {
+            ja: [
+                { type: 'group', label: '【ギヤボックス設定（ファイル実測値）】' },
+                { val: '1.0', text: '1 : 1 (等速・直結)', selected: true },
+                { val: '1.2', text: '6 : 5 (微増速)' },
+                { val: '1.5', text: '3 : 2 (中増速)' },
+                { val: '1.8', text: '9 : 5 (増速)' },
+                { val: '2.0', text: '2 : 1 (2倍速)' },
+                { val: '2.5', text: '5 : 2 (高増速)' },
+                { val: '3.0', text: '3 : 1 (最大増速・ハイギヤ)' },
+                { val: '-1.0', text: '1 : -1 (リバース・後退)' },
+                { type: 'groupEnd' }
+            ],
+            en: [
+                { type: 'group', label: '[Gearbox Ratios]' },
+                { val: '1.0', text: '1 : 1 (Direct)', selected: true },
+                { val: '1.2', text: '6 : 5' },
+                { val: '1.5', text: '3 : 2' },
+                { val: '1.8', text: '9 : 5' },
+                { val: '2.0', text: '2 : 1' },
+                { val: '2.5', text: '5 : 2' },
+                { val: '3.0', text: '3 : 1 (High)' },
+                { val: '-1.0', text: '1 : -1 (Reverse)' },
+                { type: 'groupEnd' }
+            ]
+        },
+        radType: {
+            ja: [{ val: 'rad3x3', text: '3x3 電動ラジエーター [質量:10]', selected: true }, { val: 'rad5x5', text: '5x5 電動ラジエーター [質量:25]' }],
+            en: [{ val: 'rad3x3', text: '3x3 Electric Radiator [Mass:10]', selected: true }, { val: 'rad5x5', text: '5x5 Electric Radiator [Mass:25]' }]
+        },
+        pumpType: {
+            ja: [
+                { val: 'none', text: '🛑 ポンプなし (自然循環)' },
+                { val: 'single', text: '⚡ 電動ポンプ 1発 (直列) [約28L/s]', selected: true },
+                { val: 'dual', text: '🔥 電動ポンプ 2発 (並列独立) [約55L/s]' },
+                { val: 'impeller', text: '⚙️ モジュラー用クランク駆動ポンプ' },
+                { val: 'large_single', text: '💪 大型電動ポンプ 1発 [約75L/s]' },
+                { val: 'large_dual', text: '👑 大型電動ポンプ 2発 [約125L/s]' }
+            ],
+            en: [
+                { val: 'none', text: '🛑 No Pump' },
+                { val: 'single', text: '⚡ Single Electric Pump [~28L/s]', selected: true },
+                { val: 'dual', text: '🔥 Dual Electric Pumps [~55L/s]' },
+                { val: 'impeller', text: '⚙️ Modular Crank-Driven Pump' },
+                { val: 'large_single', text: '💪 Large Electric Pump x1 [~75L/s]' },
+                { val: 'large_dual', text: '👑 Large Electric Pumps x2 [~125L/s]' }
+            ]
+        },
+        propType: {
+            ja: [
+                { type: 'group', label: '【🚗 陸上用タイヤ（ご指定の4サイズ）】' },
+                { val: 'wheel3', text: ' Wheel (3x3 基本タイヤ) [質量:1.5]', selected: true },
+                { val: 'wheel5', text: ' High Wheel (5x5 大型タイヤ) [質量:5.5]' },
+                { val: 'wheel7', text: ' Giant Wheel (7x7 巨大タイヤ) [質量:15.0]' },
+                { val: 'wheel9', text: ' Giant Wheel XL (9x9 超巨大タイヤ) [質量:25.0]' },
+                { type: 'groupEnd' },
+                
+                { type: 'group', label: '【⛓️ 履帯・キャタピラ（ご指定の4サイズ完全網羅）】' },
+                { val: 'track_small', text: ' Small Track (履帯・小) [質量:10.0 / 駆動力:38000]' },
+                { val: 'track_medium', text: ' Medium Track (履帯・中 / 標準ベース) [質量:20.0 / 駆動力:65000]' },
+                { val: 'track_large', text: ' Large Track (履帯・大) [質量:32.0 / 駆動力:98000]' },
+                { val: 'track_giant', text: ' Giant Track (履帯・特大 / 超重量高粘着) [質量:50.0 / 駆動力:150000]' },
+                { type: 'groupEnd' },
+                
+                { type: 'group', label: '【🚂 鉄路専用パーツ（鉄道車輪バリエーション）】' },
+                { val: 'train_light', text: ' Light Train Wheel (鉄道車輪・軽) [質量:4.0 / 駆動力:22000]' },
+                { val: 'train_med', text: ' Standard Train Wheel (鉄道車輪・中) [質量:10.0 / 駆動力:50000]' },
+                { val: 'train_heavy', text: ' Heavy Train Wheel (鉄道車輪・重) [質量:28.0 / 駆動力:125000]' },
+                { type: 'groupEnd' },
+                
+                { type: 'group', label: '【✈️ 航空プロペラ ＆ ヘリローター】' },
+                { val: 'aircraft_prop', text: ' Aircraft Propeller [質量:2.0]' },
+                { val: 'med_rotor', text: ' Medium Rotor [質量:5.0]' },
+                { val: 'huge_rotor', text: ' Huge Rotor [質量:20.0]' },
+                { type: 'groupEnd' }
+            ],
+            en: [
+                { type: 'group', label: '[🚗 Tires - 4 Sizes]' },
+                { val: 'wheel3', text: ' Wheel (3x3 Standard) [Mass:1.5]', selected: true },
+                { val: 'wheel5', text: ' High Wheel (5x5 Large) [Mass:5.5]' },
+                { val: 'wheel7', text: ' Giant Wheel (7x7 Heavy) [Mass:15.0]' },
+                { val: 'wheel9', text: ' Giant Wheel XL (9x9 Massive) [Mass:25.0]' },
+                { type: 'groupEnd' },
+                { type: 'group', label: '[⛓️ Track - 4 Sizes]' },
+                { val: 'track_small', text: ' Small Track (Lightweight) [Mass:10.0]' },
+                { val: 'track_medium', text: ' Medium Track (Standard) [Mass:20.0]' },
+                { val: 'track_large', text: ' Large Track (Heavy-duty) [Mass:32.0]' },
+                { val: 'track_giant', text: ' Giant Track (Massive-scale) [Mass:50.0]' },
+                { type: 'groupEnd' },
+                { type: 'group', label: '[🚂 Rail - 3 Sizes]' },
+                { val: 'train_light', text: ' Light Train Wheel [Mass:4.0]' },
+                { val: 'train_med', text: ' Standard Train Wheel [Mass:10.0]' },
+                { val: 'train_heavy', text: ' Heavy Train Wheel [Mass:28.0]' },
+                { type: 'groupEnd' },
+                { type: 'group', label: '[✈️ Aviation & Rotors]' },
+                { val: 'aircraft_prop', text: ' Aircraft Propeller [Mass:2.0]' },
+                { val: 'med_rotor', text: ' Medium Helicopter Rotor [Mass:5.0]' },
+                { val: 'huge_rotor', text: ' Huge Helicopter Rotor [Mass:20.0]' },
+                { type: 'groupEnd' }
+            ]
+        },
+        dragType: {
+            ja: [{ val: 'low', text: '流線型・航空機体 (流体抵抗：小)' }, { val: 'mid', text: '標準型・オフローダー (流体抵抗：中)', selected: true }, { val: 'high', text: '豆腐型・重機 / 鉄道車両 (流体抵抗：大)' }],
+            en: [{ val: 'low', text: 'Streamlined (Low Drag)' }, { val: 'mid', text: 'Standard (Mid Drag)', selected: true }, { val: 'high', text: 'Boxy Heavy Machine (High Drag)' }]
+        }
+    };
+
+    // ロシア語・中国語のフォールバック処理
+    selectOptions.engineType.ru = selectOptions.engineType.en; selectOptions.engineType.zh = selectOptions.engineType.ja;
+    selectOptions.gearRatio.ru = selectOptions.gearRatio.en; selectOptions.gearRatio.zh = selectOptions.gearRatio.ja;
+    selectOptions.radType.ru = selectOptions.radType.en; selectOptions.radType.zh = selectOptions.radType.ja;
+    selectOptions.pumpType.ru = selectOptions.pumpType.en; selectOptions.pumpType.zh = selectOptions.pumpType.ja;
+    selectOptions.propType.ru = selectOptions.propType.en; selectOptions.propType.zh = selectOptions.propType.ja;
+    selectOptions.dragType.ru = selectOptions.dragType.en; selectOptions.dragType.zh = selectOptions.dragType.ja;
+const engineMaster = {
+        std_small:  { isModular: false, mass: 30,  powerFactor: 1.2,  heatFactor: 0.08,  fuelFactor: 0.0015 },
+        std_medium: { isModular: false, mass: 80,  powerFactor: 5.0,  heatFactor: 0.25,  fuelFactor: 0.0050 },
+        std_large:  { isModular: false, mass: 400, powerFactor: 24.0, heatFactor: 1.10,  fuelFactor: 0.0240 },
+        mod_1x1:    { isModular: true,  mass: 1,   powerFactor: 0.35, heatFactor: 0.025, fuelFactor: 0.00035 },
+        mod_3x3:    { isModular: true,  mass: 11,  powerFactor: 3.20, heatFactor: 0.220, fuelFactor: 0.00310 },
+        mod_5x5:    { isModular: true,  mass: 45,  powerFactor: 16.5, heatFactor: 1.150, fuelFactor: 0.01620 }
+    };
+
+    const radSpecs = {
+        rad3x3: { mass: 10, coolingPower: 1.2 },
+        rad5x5: { mass: 25, coolingPower: 3.5 }
+    };
+
+    // 🚀 全パーツのXML・物理シミュレーション用パラメータ（完全版）
+    const propSpecs = {
+        // タイヤ4サイズ
+        wheel3:            { mass: 1.50,  radius: 0.375, baseLoadFactor: 0.060, maxForce: 8000,   efficiency: 1.0,   type: 'land' },
+        wheel5:            { mass: 5.50,  radius: 0.625, baseLoadFactor: 0.120, maxForce: 22000,  efficiency: 1.0,   type: 'land' },
+        wheel7:            { mass: 15.00, radius: 0.875, baseLoadFactor: 0.340, maxForce: 55000,  efficiency: 1.0,   type: 'land' },
+        wheel9:            { mass: 25.00, radius: 1.125, baseLoadFactor: 0.520, maxForce: 110000, efficiency: 1.0,   type: 'land' }, 
+        
+        // 履帯（キャタピラ）ご指定の4サイズ完全版
+        track_small:       { mass: 10.00, radius: 0.350, baseLoadFactor: 0.250, maxForce: 38000,  efficiency: 0.90,  type: 'track' }, 
+        track_medium:      { mass: 20.00, radius: 0.500, baseLoadFactor: 0.450, maxForce: 65000,  efficiency: 0.88,  type: 'track' }, 
+        track_large:       { mass: 32.00, radius: 0.650, baseLoadFactor: 0.650, maxForce: 98000,  efficiency: 0.85,  type: 'track' }, 
+        track_giant:       { mass: 50.00, radius: 0.850, baseLoadFactor: 0.950, maxForce: 150000, efficiency: 0.80,  type: 'track' }, 
+        
+        // 鉄道車輪3バリエーション
+        train_light:       { mass: 4.00,  radius: 0.250, baseLoadFactor: 0.008, maxForce: 22000,  efficiency: 0.99,  type: 'rail' },  
+        train_med:         { mass: 10.00, radius: 0.350, baseLoadFactor: 0.012, maxForce: 50000,  efficiency: 0.98,  type: 'rail' },  
+        train_heavy:       { mass: 28.00, radius: 0.550, baseLoadFactor: 0.025, maxForce: 125000, efficiency: 0.96,  type: 'rail' },  
+        
+        // 航空・推進パーツ
+        aircraft_prop:     { mass: 2.0,   radius: 1.250, baseLoadFactor: 0.008, maxForce: 70000,  efficiency: 0.02,  type: 'aero_prop' }, 
+        med_rotor:         { mass: 5.0,   radius: 2.500, baseLoadFactor: 0.022, maxForce: 100000, efficiency: 0.016, type: 'aero_rotor' }, 
+        huge_rotor:        { mass: 20.0,  radius: 4.500, baseLoadFactor: 0.045, maxForce: 250000, efficiency: 0.015, type: 'aero_rotor' }  
+    };
+
+    const dragSpecs = { low: 0.008, mid: 0.032, high: 0.085 };
+    const selectIds = ['engineType', 'gearRatio', 'radType', 'pumpType', 'propType', 'dragType'];
+
+    function populateSelects() {
+        selectIds.forEach(id => {
+            const el = document.getElementById(id);
+            const currentVal = el.value;
+            el.innerHTML = '';
+
+            let currentGroup = null;
+            selectOptions[id][currentLang].forEach(opt => {
+                if (opt.type === 'group') {
+                    currentGroup = document.createElement('optgroup');
+                    currentGroup.label = opt.label;
+                    el.appendChild(currentGroup);
+                } else if (opt.type === 'groupEnd') {
+                    currentGroup = null;
+                } else {
+                    const optionEl = document.createElement('option');
+                    optionEl.value = opt.val;
+                    optionEl.text = opt.text;
+                    if (currentVal) {
+                        if (opt.val === currentVal) optionEl.selected = true;
+                    } else if (opt.selected) {
+                        optionEl.selected = true;
+                    }
+                    
+                    if (currentGroup) currentGroup.appendChild(optionEl);
+                    else el.appendChild(optionEl);
+                }
+            });
+        });
+    }
+
+    function changeLanguage(lang, e) {
+        currentLang = lang;
+        const btns = document.querySelectorAll('.lang-btn');
+        btns.forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+
+        const txts = uiTexts[lang];
+        Object.keys(txts).forEach(key => {
+            const el = document.getElementById(key);
+            if (el) el.innerText = txts[key];
+        });
+
+        populateSelects();
+        updateSimulation();
+    }
+
+    function updateSimulation() {
+        const eType = document.getElementById('engineType').value || 'std_medium';
+        const eCount = Math.max(1, parseInt(document.getElementById('engineCount').value) || 1);
+        const gearRatio = parseFloat(document.getElementById('gearRatio').value) || 1.5;
+        const radType = document.getElementById('radType').value || 'rad3x3';
+        const radCount = Math.max(1, parseInt(document.getElementById('radCount').value) || 1);
+        const pumpType = document.getElementById('pumpType').value || 'single';
+        const propType = document.getElementById('propType').value || 'wheel3';
+        const dragType = document.getElementById('dragType').value || 'mid';
+        
+        const rps = parseFloat(document.getElementById('rps').value);
+        const throttle = parseFloat(document.getElementById('throttle').value);
+
+        document.getElementById('rpsVal').innerText = rps;
+        document.getElementById('throttleVal').innerText = throttle.toFixed(2);
+
+        const spec = engineMaster[eType];
+        const rad = radSpecs[radType];
+        const prop = propSpecs[propType];
+        const baseDrag = dragSpecs[dragType];
+        const langT = uiTexts[currentLang];
+
+        const note = document.getElementById('cylinderNote');
+        if (spec.isModular) {
+            note.innerText = langT.noteMod.replace('{count}', eCount);
+        } else {
+            note.innerText = langT.noteStd.replace('{count}', eCount);
+        }
+
+        // 1. システム質量合計
+        const totalMass = (spec.mass * eCount) + (rad.mass * radCount) + prop.mass;
+        document.getElementById('totalMass').innerText = totalMass.toFixed(1) + langT.unitMass;
+
+        // 2. 最大エンジン馬力トルク
+        const enginePower = rps * throttle * eCount * spec.powerFactor;
+        document.getElementById('totalPower').innerText = enginePower.toFixed(1) + " SW-Torque";
+
+        // 3. 各駆動レイアウトごとの物理反トルク・出力計算
+        const propRPS = Math.abs(rps / gearRatio);
+        let propLoadTorque = 0;
+        let generatedForce = 0;
+
+        if (prop.type === 'land') {
+            propLoadTorque = prop.baseLoadFactor * propRPS;
+            generatedForce = propRPS * throttle * (prop.maxForce / 25) * prop.efficiency;
+        } else if (prop.type === 'track') {
+            // 履帯：高い摩擦抵抗と接地による強力な駆動トルクをサイズ別に再現
+            propLoadTorque = prop.baseLoadFactor * (propRPS * 1.3);
+            generatedForce = propRPS * throttle * (prop.maxForce / 18) * prop.efficiency;
+        } else if (prop.type === 'rail') {
+            // 鉄道車輪：鉄路上の極小の転がり抵抗を再現
+            propLoadTorque = prop.baseLoadFactor * Math.pow(propRPS, 0.90);
+            generatedForce = propRPS * throttle * (prop.maxForce / 20) * prop.efficiency;
+        } else if (prop.type === 'aero_prop') {
+            propLoadTorque = prop.baseLoadFactor * (propRPS * propRPS);
+            generatedForce = propRPS * throttle * prop.maxForce * prop.efficiency * 0.45; 
+        } else if (prop.type === 'aero_rotor') {
+            propLoadTorque = prop.baseLoadFactor * (propRPS * propRPS) * 2.2;
+            generatedForce = propRPS * throttle * prop.maxForce * prop.efficiency * 0.8; 
+        }
+
+        const finalFeedbackLoad = propLoadTorque * gearRatio;
+        document.getElementById('propLoad').innerText = finalFeedbackLoad.toFixed(1) + " Nm";
+        document.getElementById('outForce').innerText = generatedForce.toFixed(0) + " N";
+
+        // 4. 流体循環流量
+        let calculatedFlow = 0.0;
+        let flowEfficiency = 1.0; 
+
+        if (pumpType === 'none') { calculatedFlow = 1.8 + (rps * 0.02); flowEfficiency = 0.15; }
+        else if (pumpType === 'single') { calculatedFlow = Math.max(0, 28.5 - (radCount * 0.4)); flowEfficiency = 0.78; }
+        else if (pumpType === 'dual') { calculatedFlow = Math.max(0, 56.0 - (radCount * 0.2)); flowEfficiency = 1.00; }
+        else if (pumpType === 'impeller') { calculatedFlow = rps * 2.1; flowEfficiency = Math.min(1.0, calculatedFlow / 42.0); if (flowEfficiency < 0.1) flowEfficiency = 0.1; }
+        else if (pumpType === 'large_single') { calculatedFlow = Math.max(0, 75.0 - (radCount * 0.5)); flowEfficiency = 1.00; }
+        else if (pumpType === 'large_dual') { calculatedFlow = Math.max(0, 125.0 - (radCount * 0.3)); flowEfficiency = 1.00; }
+
+        document.getElementById('flowRate').innerText = calculatedFlow.toFixed(1) + " L/s";
+
+       // 5. 発熱と燃費の補正
+        const loadStressFactor = 1.0 + (finalFeedbackLoad / Math.max(1, enginePower));
+        let fuelConsumptionPerSec = rps * throttle * eCount * spec.fuelFactor * (1.0 + (finalFeedbackLoad * 0.015));
+        if (fuelConsumptionPerSec < 0) fuelConsumptionPerSec = 0;
+        document.getElementById('fuelCons').innerText = fuelConsumptionPerSec.toFixed(4) + " L/s (" + (fuelConsumptionPerSec * 60).toFixed(1) + " L/min)";
+
+        const heatGenerated = rps * throttle * eCount * spec.heatFactor * 10 * loadStressFactor;
+        document.getElementById('heatGen').innerText = heatGenerated.toFixed(0) + " units";
+
+        // 6. 最高速度
+        let estSpeedMPS = 0;
+        const netDrivingForce = generatedForce - (totalMass * 0.04);
+        
+        if (netDrivingForce > 0 && rps > 3.5 && enginePower > finalFeedbackLoad) {
+            const totalDragCoefficient = baseDrag * (prop.radius * 2);
+            estSpeedMPS = Math.sqrt(netDrivingForce / Math.max(0.001, totalDragCoefficient)) * throttle;
+            const maxTheoreticalMPS = propRPS * (prop.radius * 2) * Math.PI;
+            if (estSpeedMPS > maxTheoreticalMPS) estSpeedMPS = maxTheoreticalMPS;
+        }
+        
+        const speedKMH = estSpeedMPS * 3.6;
+        const speedKnot = speedKMH / 1.852;
+        document.getElementById('speedDisplay').innerText = speedKMH.toFixed(1) + " km/h";
+        document.getElementById('speedUnitKnot').innerText = `(${speedKnot.toFixed(1)} knots / ${estSpeedMPS.toFixed(1)} m/s)`;
+
+        // 7. 熱飽和温度
+        const ambientTemp = 15;
+        const totalCoolingPower = ((rad.coolingPower * radCount) * flowEfficiency) + (eCount * 0.005);
+        let finalTemp = ambientTemp;
+        if (heatGenerated > 0) finalTemp = ambientTemp + (heatGenerated / totalCoolingPower);
+
+        const tempDisplay = document.getElementById('tempDisplay');
+        const tempStatus = document.getElementById('tempStatus');
+        const tempBox = document.getElementById('tempBox');
+        tempDisplay.innerText = finalTemp.toFixed(1) + " ℃";
+
+        if (finalTemp <= 85) {
+            tempBox.style.borderColor = "#1dd1a1"; tempDisplay.style.color = "#1dd1a1";
+            tempDisplay.style.textShadow = "0 0 12px rgba(29,209,161,0.4)";
+            tempStatus.innerText = langT.tempSafe; tempStatus.style.color = "#1dd1a1";
+        } else if (finalTemp <= 100) {
+            tempBox.style.borderColor = "#ff9f43"; tempDisplay.style.color = "#ff9f43";
+            tempDisplay.style.textShadow = "0 0 12px rgba(255,159,67,0.4)";
+            tempStatus.innerText = langT.tempWarn; tempStatus.style.color = "#ff9f43";
+        } else {
+            tempBox.style.borderColor = "#ff4757"; tempDisplay.style.color = "#ff4757";
+            tempDisplay.style.textShadow = "0 0 12px rgba(255,71,87,0.4)";
+            tempStatus.innerText = langT.tempDanger; tempStatus.style.color = "#ff4757";
+        }
+
+        // 8. 総合警告
+        const alertDiv = document.getElementById('statusAlert');
+        if (finalFeedbackLoad > enginePower) {
+            alertDiv.innerText = langT.alertStall; alertDiv.style.color = "#ff6b6b";
+        } else if (finalTemp > 100) {
+            alertDiv.innerText = langT.alertOverheat; alertDiv.style.color = "#ff9f43";
+        } else {
+            alertDiv.innerText = langT.alertStable; alertDiv.style.color = "#1dd1a1";
+        }
+    }
+
+    const inputs = ['engineType', 'engineCount', 'gearRatio', 'radType', 'radCount', 'pumpType', 'propType', 'dragType', 'rps', 'throttle'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', updateSimulation);
+        document.getElementById(id).addEventListener('change', updateSimulation);
+    });
+
+    populateSelects();
+    updateSimulation();
+</script>
+</body>
+</html>
