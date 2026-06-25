@@ -4,6 +4,7 @@
 こちらから行けます！： https://torukura.github.io/Stormworks-simulator/
 連絡先：https://x.com/torukura_kaeru
 【📣アプデ情報📣】
+
 6/24アップデート内容：重さのカスタム、ヘリの負荷（テールロータ式＆二重反転ローター式）を選択できるように。
 航空機や車両の負荷等を増やし、使いやすくカスタム。
 言語をグーグル翻訳に対応させ、ラインを一部すっきりさせた。
@@ -20,6 +21,7 @@ Update information is below!
 You can access it here: https://torukura.github.io/Stormworks-simulator/
 Contact: https://x.com/torukura_kaeru
 【📣Update Information📣】
+
 6/24 Update Details: Added weight customization and helicopter load selection (tail rotor type & counter-rotating rotor type).
 Increased aircraft and vehicle load options for easier customization.
 Added Google Translate support and streamlined some lines.
