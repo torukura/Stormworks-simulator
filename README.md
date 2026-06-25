@@ -1,8 +1,11 @@
 ストームワークスのエンジン（既存エンジン・モジュラーエンジン）の冷却等のシュミレーションです。
 まだプロトタイプなのでこういうのあったらいいと思う等ありましたらご連絡ください。
 アプデ情報は下にあります！
+
 こちらから行けます！： https://torukura.github.io/Stormworks-simulator/
+
 連絡先：https://x.com/torukura_kaeru
+
 【📣アプデ情報📣】
 
 6/24アップデート内容：重さのカスタム、ヘリの負荷（テールロータ式＆二重反転ローター式）を選択できるように。
@@ -18,8 +21,11 @@
 This is a simulation of the cooling system for Stormworks engines (existing engines and modular engines).
 This is still a prototype, so please let us know if you have any suggestions for features you'd like to see.
 Update information is below!
+
 You can access it here: https://torukura.github.io/Stormworks-simulator/
+
 Contact: https://x.com/torukura_kaeru
+
 【📣Update Information📣】
 
 6/24 Update Details: Added weight customization and helicopter load selection (tail rotor type & counter-rotating rotor type).
