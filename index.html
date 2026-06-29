@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stormworks Advanced Engine & Vehicle Propulsion Simulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+    <div class="global-notice" id="draggableNotice">
+        <div class="close-notice-btn" onclick="closeNotice()">×</div>
+        🌐 <strong>For English / Global Users:</strong><br>
+        Please right-click anywhere and select <strong>"Translate to English"</strong> in your browser to use this tool!
+    </div>
+
+    <h1>Stormworks エンジンパワー＆冷却・足回りシミュレーター</h1>
+    
+    <div class="grid">
+        <div class="panel">
+            <h2>1. エンジン・パワートレイン設定</h2>
+            <div class="input-group">
+                <label for="engineType">エンジンの種類 (Engine Type)</label>
+                <select id="engineType">
+                    <optgroup label="【既存の一体型エンジン / Prefab Engines】">
+                        <option value="std_small">Small Engine (既存小型) [質量:30]</option>
+                        <option value="std_medium" selected>Medium Engine (既存中型) [質量:80]</option>
+                        <option value="std_large">Large Engine (既存大型) [質量:400]</option>
+                    </optgroup>
+                    <optgroup label="【モジュラーエンジン / Modular Engines】">
+                        <option value="mod_1x1">1x1 モジュラーシリンダー [単体質量:1]</option>
+                        <option value="mod_3x3">3x3 モジュラーシリンダー [単体質量:11]</option>
+                        <option value="mod_5x5">5x5 モジュラーシリンダー [単体質量:45]</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="engineCount">設置台数 / 気筒数 (Amount / Cylinders)</label>
+                <input type="number" id="engineCount" min="1" max="64" value="1">
+                <span class="info-note" id="cylinderNote">※既存は「台数」、モジュールは「気筒数」</span>
+            </div>
+
+            <div class="input-group">
+                <label for="gearRatio">ギヤボックス比率 (Gearbox Ratio)</label>
+                <select id="gearRatio">
+                    <optgroup label="【ギヤボックス設定】">
+                        <option value="1.0" selected>1 : 1 (等速・直結)</option>
+                        <option value="1.2">6 : 5 (微増速)</option>
+                        <option value="1.5">3 : 2 (中増速)</option>
+                        <option value="1.8">9 : 5 (増速)</option>
+                        <option value="2.0">2 : 1 (2倍速)</option>
+                        <option value="2.5">5 : 2 (高増速)</option>
+                        <option value="3.0">3 : 1 (最大増速・ハイギヤ)</option>
+                        <option value="-1.0">1 : -1 (リバース・後退)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <h2>2. 冷却ライン＆流体設定 🛠️ (Cooling & Fluids)</h2>
+            <div class="input-group">
+                <label for="radType">使用するラジエーターの種類 (Radiator Type)</label>
+                <select id="radType">
+                    <option value="rad3x3" selected>3x3 電動ラジエーター [質量:10]</option>
+                    <option value="rad5x5">5x5 電動ラジエーター [質量:25]</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="radCount">ラジエーターの設置枚数 (Radiator Amount)</label>
+                <input type="number" id="radCount" min="1" max="32" value="1">
+            </div>
+
+            <div class="input-group">
+                <label for="pumpType">冷却ラインの配管構成 (Pump Setup)</label>
+                <select id="pumpType">
+                    <option value="none" selected>🛑 ポンプなし (自然循環 / No Pump)</option>
+                    <option value="single">⚡ 電動ポンプ 1発 [約28L/s] (Electric Pump x1)</option>
+                    <option value="dual">🔥 電動ポンプ 2発 [約55L/s] (Dual Pumps)</option>
+                    <option value="impeller">⚙️ クランク駆動ポンプ (Modular Impeller Pump)</option>
+                    <option value="large_single">💪 大型電動ポンプ 1発 [約75L/s] (Large Pump x1)</option>
+                    <option value="large_dual">👑 大型電動ポンプ 2発 [約125L/s] (Large Pumps x2)</option>
+                </select>
+            </div>
+
+            <h2>3. 推進・駆動パーツ ＆ 操作環境 ⚓ (Propulsion & Drive)</h2>
+            <div class="input-group">
+                <label for="propCategory">駆動システムの種類 (Propulsion Category)</label>
+                <select id="propCategory" onchange="updatePropPartsOptions()">
+                    <option value="ground" selected>🚗 陸上用タイヤ・履帯 ＆ 鉄道 (Ground & Tracks)</option>
+                    <option value="aviation">✈️ 航空プロペラ ＆ ヘリローター (Aviation & Rotors)</option>
+                    <option value="marine">⚓ 水上・水中用推進器 (Marine Propulsion)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="propType">使用するパーツとサイズ (Select Part & Size)</label>
+                <select id="propType"></select>
+            </div>
+
+            <div class="input-group">
+                <label for="heliLayout" id="layoutLabel">機体タイプ・動輪数（ペア）設定 (Layout Setup)</label>
+                <select id="heliLayout"></select>
+            </div>
+
+            <div class="input-group">
+                <label for="customMass">カスタム追加質量 (車体ブロック重量など / Vehicle Mass)</label>
+                <input type="number" id="customMass" min="0" max="100000000" value="0" step="1">
+            </div>
+
+            <div class="input-group">
+                <label for="dragType">機体・車体の形状 (空気/水流抵抗ベース / Drag Profile)</label>
+                <select id="dragType">
+                    <option value="low">流線型・航空機体 (Low Drag / Aero)</option>
+                    <option value="mid" selected>標準型・オフローダー (Mid Drag / SUV)</option>
+                    <option value="high">豆腐型・重機 / 鉄道車両 (High Drag / Boxy)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>目標RPS (Target RPS): <span class="range-val" id="rpsVal">20</span></label>
+                <input type="range" id="rps" min="2" max="100" step="0.5" value="20">
+            </div>
+
+            <div class="input-group">
+                <label>スロットル開度 (Throttle): <span class="range-val" id="throttleVal">1.0</span></label>
+                <input type="range" id="throttle" min="0" max="1" step="0.05" value="0.5">
+            </div>
+        </div>
+
+        <div class="panel" style="display: flex; flex-direction: column; justify-content: flex-start;">
+            <h2>4. リアルタイム・シミュレーション結果 (Results)</h2>
+            
+            <div class="result-item">
+                <span>システム合計質量 (Total System Mass):</span>
+                <span class="result-val" id="totalMass">0</span>
+            </div>
+            <div class="result-item">
+                <span>総発生最大トルク (Total Max Torque):</span>
+                <span class="result-val" id="totalPower">0</span>
+            </div>
+            <div class="result-item">
+                <span>推進器からエンジンへの逆流負荷 (Load Torque):</span>
+                <span class="result-val" id="propLoad" style="color: #ff7675;">0 Nm</span>
+            </div>
+            <div class="result-item">
+                <span>発生推力 / 地面駆動力出力 (Thrust / Drive Force):</span>
+                <span class="result-val" id="outForce" style="color: #ff9f43;">0 N</span>
+            </div>
+            <div class="result-item">
+                <span>冷却ラインの循環流量 (Coolant Flow Rate):</span>
+                <span class="result-val" id="flowRate" style="color: #00d2d3;">0.0 L/s</span>
+            </div>
+            <div class="result-item">
+                <span>総発熱量 (Total Heat Generated):</span>
+                <span class="result-val" id="heatGen" style="color: #ff4757;">0 units</span>
+            </div>
+            <div class="result-item">
+                <span>推定燃料消費量 (Fuel Consumption):</span>
+                <span class="result-val" id="fuelCons" style="color: #1dd1a1;">0.00 L/s</span>
+            </div>
+            
+            <div class="results-section" style="margin-top: 20px; border-top: 2px solid #3a3a47; padding-top: 15px;">
+                <h3 style="margin-top: 0; color: #1dd1a1; border-bottom: 2px solid #1dd1a1; padding-bottom: 8px; font-size: 1.1rem;">📊 シミュレーション結果 メーター (Details)</h3>
+                
+                <div class="result-box" id="tempBox" style="border-color: #1dd1a1;">
+                    <div class="result-title" id="tempTitle" style="color: #1dd1a1;">🌡️ 連続運転時の推定飽和温度 (STABILIZED TEMP)</div>
+                    <div class="result-value" id="tempDisplay" style="color: #1dd1a1;">15.0 ℃</div>
+                    <div class="result-status" id="tempStatus" style="color: #a4b0be;">周囲温度と同じ (Engine Stopped)</div>
+                </div>
+
+                <div class="result-box" id="adviceBox" style="border-color: #1dd1a1; background: rgba(29, 209, 161, 0.05);">
+                    <div class="result-title" style="color: #ffa502;">💡 冷却システムへのアドバイス (Cooling Advice)</div>
+                    <div class="result-status" id="adviceDisplay" style="color: #ffffff; font-size: 1rem; line-height: 1.5; padding-top: 5px;">
+                        エンジンが安定稼働しています。
+                    </div>
+                </div>
+
+                <div class="result-box" id="speedBox" style="border-color: #00d2d3;">
+                    <div class="result-title" style="color: #00d2d3;">🏁 計算上の推定最高速度 (ESTIMATED TOP SPEED)</div>
+                    <div class="result-value" id="speedDisplay" style="color: #ffffff;">0.0 km/h</div>
+                    <div class="result-status" id="speedUnitKnot">(0.0 knots / 0.0 m/s)</div>
+                </div>
+
+                <div style="margin-top: 20px; padding: 10px; background: #222f3e; border-radius: 5px; text-align: center; font-weight: bold; font-size: 0.9rem;">
+                    <span id="statusAlert" style="color: #1dd1a1;">● パワートレイン・推進駆動システム正常 / Operating Safely</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="simulator.js"></script>
+</body>
+</html>
