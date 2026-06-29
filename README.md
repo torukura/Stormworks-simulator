@@ -18,6 +18,9 @@
 極低回転時、トルク不足によるストール表記が追加。
 カスタム追加重量に巨大な数値を入力した際、速度計算が0になる仕様を変更。
 
+6/29アップデート内容：エンジン温度があまりにもかけ離れていたので全体的に合うように修正。
+又ファイルを３つに分離し、改造しやすいように変更。
+
 This is a simulation of the cooling system for Stormworks engines (existing engines and modular engines).
 This is still a prototype, so please let us know if you have any suggestions for features you'd like to see.
 Update information is below!
@@ -37,3 +40,6 @@ Added Google Translate support and streamlined some lines.
 Added cooling advice. Please use it only as a guideline.
 Added a stall indicator due to insufficient torque at extremely low RPMs.
 Changed the specification where entering a huge number in the custom weight field would result in the speed calculation being 0.
+
+June 29th Update Notes: The engine temperature readings were too inaccurate, so they have been corrected to be more accurate overall.
+Also, the files have been split into three separate files for easier modification.
